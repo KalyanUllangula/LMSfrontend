@@ -1,0 +1,74 @@
+import axios from "axios";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
+
+class BooksOrder extends React.Component {
+  state = {
+    booksorder: [],
+  };
+  componentDidMount() {
+    axios
+      .get("http://localhost:8080/lms/viewOrderList")
+      .then((response) => {
+        console.log(response);
+        this.setState({ booksorder: response.data });
+      })
+      .catch((error) => console.log(error));
+  }
+  handleDelete = (id) => {
+    axios.delete(`http://localhost:8080/lms/cancelOrder/${id}`).then((res) => {
+      const booksorder = this.state.booksorder.filter((au) => au.orderId != id);
+      this.setState({ booksorder: booksorder });
+    });
+  };
+  render() {
+    return (
+      <div className = "container">
+        <Link to="/addorder/add" className="btn btn-primary btn-large mt-3 float-end">
+          Add
+        </Link>
+       
+        <table className="table  mx-auto mt-5 container-fluid table table-info table-striped ">
+          <thead>
+            <tr>
+              <th>OrderId</th>
+              <th>OrderStatus</th>
+              <th>Quantity</th>
+              <th>OrderDate</th>
+              <th>Bookid</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.booksorder.map((bookorder) => (
+              <tr>
+                <td>{bookorder.orderId}</td>
+                <td>{bookorder.orderStatus}</td>
+                <td>{bookorder.quantity}</td>
+                <td>{bookorder.orderDate}</td>
+                <td>{bookorder.books.bookid}</td>
+                <td>
+                  <Link to={`/booksorder/update/${bookorder.orderId}`}> 
+                    <input
+                      type="button"
+                      value="Edit"
+                      className="btn btn-primary me-2"
+                    />
+                    </Link >
+                  <input
+                    type="button"
+                    value="Cancel"
+                    className="btn btn-danger"
+                    onClick={() => this.handleDelete(bookorder.orderId)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export default BooksOrder;
